@@ -1,68 +1,74 @@
-# Traefik Helm Chart values — Bare-metal single node + cert-manager TLS
-#
-# Traefik handles ingress and TLS termination.
-# TLS certificates are issued by cert-manager (not Traefik ACME).
-# The IngressClass is enabled so cert-manager's HTTP-01 solver can use it.
-#
-# DEPLOY:
-#   helm upgrade --install traefik oci://ghcr.io/traefik/helm/traefik \
-#     --namespace traefik \
-#     --create-namespace \
-#     -f traefik/values.yaml
+# ==========================================
+# Traefik Production Configuration
+# Single Node On-Prem Deployment
+# TLS handled by cert-manager
+# ==========================================
 
 namespaceOverride: "traefik"
+
+deployment:
+  replicas: 1
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9100"
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+
+service:
+  # ClusterIP because hostPort exposes directly on node
+  type: ClusterIP
 
 logs:
   general:
     level: "INFO"
-    format: "common"
+    format: "json"
   access:
     enabled: true
+
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true
+  kubernetesGateway:
+    enabled: false
+
+# Only keep arguments that are safe in v3
+additionalArguments:
+  - "--serversTransport.insecureSkipVerify=true"
+
+ports:
+  web:
+    port: 8000
+    exposedPort: 80
+    hostPort: 80
+    protocol: TCP
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+
+  websecure:
+    port: 8443
+    exposedPort: 443
+    hostPort: 443
+    protocol: TCP
+    asDefault: true
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
 
 ingressRoute:
   dashboard:
     enabled: false
 
-# Register Traefik as an IngressClass so cert-manager HTTP-01 solver can use it
-ingressClass:
-  enabled: true
-  isDefaultClass: true
-
-# Enable both: CRDs for OpenCRVS IngressRoutes, and vanilla Ingress for cert-manager HTTP-01
-providers:
-  kubernetesCRD:
-    enabled: true
-  kubernetesIngress:
-    enabled: true   # required for cert-manager HTTP-01 challenge
-  kubernetesGateway:
-    enabled: false
-
-service:
-  type: ClusterIP   # bare-metal: access via hostPort below
-
-deployment:
-  replicas: 1
-
-ports:
-  web:
-    port: 80
-    hostPort: 80      # bind directly to node port 80
-    expose:
-      default: true
-    exposedPort: 80
-    redirectTo:
-      port: websecure  # HTTP → HTTPS
-  websecure:
-    port: 443
-    hostPort: 443     # bind directly to node port 443
-    expose:
-      default: true
-    exposedPort: 443
-    tls:
-      enabled: true
-
-persistence:
-  enabled: false      # cert-manager manages certs, no ACME storage needed
-
-tolerations: []
-nodeSelector: {}
+# No default certificate.
+# cert-manager Certificates will be referenced per Ingress.
+tlsStore: {}
