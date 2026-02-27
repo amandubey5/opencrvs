@@ -1,0 +1,26 @@
+---
+# ClusterIssuer — Let's Encrypt (HTTP-01 challenge)
+#
+# Uses HTTP-01 challenge via Traefik's Ingress support.
+# No DNS API token needed — cert-manager just needs port 80 accessible.
+#
+# APPLY:
+#   kubectl apply -f cert-manager/clusterissuer.yaml
+#
+# VERIFY:
+#   kubectl get clusterissuer letsencrypt-prod
+#   # READY should be True
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: amankrd01@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik

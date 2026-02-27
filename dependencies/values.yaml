@@ -1,0 +1,23 @@
+# OpenCRVS Dependencies Helm values
+#
+# DEPLOY:
+#   helm upgrade --install opencrvs-deps oci://ghcr.io/opencrvs/opencrvs-dependencies-chart \
+#     --namespace opencrvs-deps-dev \
+#     --create-namespace \
+#     --atomic \
+#     --timeout 10m \
+#     -f dependencies/values.yaml
+
+chart_dev_mode: false
+hostname: opencrvs.com
+storage_type: pvc
+storageClass: local-path
+
+monitoring:
+  enabled: false
+
+backup:
+  enabled: false
+
+restore:
+  enabled: false
