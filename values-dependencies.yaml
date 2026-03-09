@@ -9,7 +9,13 @@
 #     -f dependencies/values.yaml
 
 chart_dev_mode: false
-hostname: opencrvs.com
+hostname: szicrvs.techno-associates.live
+
+global:
+  cluster:
+    domain: szicrvs.techno-associates.live
+    tlsSecretName: opencrvs-custom-tls
+
 storage_type: pvc
 storageClass: local-path
 

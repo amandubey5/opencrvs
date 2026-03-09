@@ -1,0 +1,46 @@
+hostname: szicrvs.techno-associates.live
+
+ingress:
+  enabled: true
+  ssl_enabled: true
+  tls_resolver: ""
+  tls_secret_name: opencrvs-custom-tls
+
+# OpenCRVS core image tag:
+image:
+  tag: v1.9.7
+
+countryconfig:
+  image:
+    tag: v1.9.7
+
+elasticsearch:
+  host: elasticsearch.opencrvs-deps-dev.svc.cluster.local
+  port: 9200
+  auth_mode: disabled
+
+influxdb:
+  host: influxdb.opencrvs-deps-dev.svc.cluster.local
+  port: 8086
+  db: ocrvs
+
+postgres:
+  host: postgres.opencrvs-deps-dev.svc.cluster.local
+  port: 5432
+  auth_mode: disabled
+
+env:
+  NODE_ENV: production
+  QA_ENV: true
+
+data_seed:
+  enabled: true
+
+hpa:
+  enabled: false
+
+pdb:
+  enabled: false
+
+dashboards:
+  enabled: false
