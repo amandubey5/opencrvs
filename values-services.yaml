@@ -43,4 +43,4 @@ pdb:
   enabled: false
 
 dashboards:
-  enabled: false
+  enabled: true
